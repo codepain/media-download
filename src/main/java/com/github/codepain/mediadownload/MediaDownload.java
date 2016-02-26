@@ -5,6 +5,7 @@ import java.net.URL;
 
 import com.github.codepain.mediadownload.download.Downloadable;
 import com.github.codepain.mediadownload.reader.BandcampReader;
+import com.github.codepain.mediadownload.reader.HearThisAtReader;
 import com.github.codepain.mediadownload.reader.Reader;
 import com.github.codepain.mediadownload.reader.SoundcloudReader;
 
@@ -50,6 +51,8 @@ public final class MediaDownload {
 			reader = new BandcampReader(url);
 		} else if (url.getHost().toLowerCase().endsWith("soundcloud.com")) {
 			reader = new SoundcloudReader(url);
+		} else if (url.getHost().toLowerCase().endsWith("hearthis.at")) {
+			reader = new HearThisAtReader(url);
 		}
 
 		if (reader == null) {

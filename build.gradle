@@ -1,0 +1,40 @@
+apply plugin: 'java'
+apply plugin: 'maven-publish'
+
+group = 'com.github.codepain'
+version = '0.1.0'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+	jcenter()
+}
+
+dependencies {
+	compile 'org.jsoup:jsoup:1.8.3'
+	compile 'com.mpatric:mp3agic:0.8.3'
+	compile ('com.googlecode.json-simple:json-simple:1.1.1') {
+		exclude group: 'junit'
+	}
+}
+
+task sourceJar(type: Jar) { 
+	from sourceSets.main.allJava
+}
+	
+publishing {
+	publications {
+		mavenJava(MavenPublication) {
+			from components.java
+
+			artifact sourceJar {
+				classifier "sources"
+			}
+		}
+	}
+}
+
+jar {
+	manifest.attributes provider: 'codepain'
+}

@@ -71,7 +71,7 @@ public class SoundcloudReader extends Reader {
 			}
 		}
 
-		return null;
+		throw new IOException("Unable to interpret [" + url + "]");
 	}
 
 	private Downloadable interpretJsCode(final String code) throws IOException {

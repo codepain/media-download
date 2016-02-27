@@ -7,17 +7,11 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
 
 import javax.imageio.ImageIO;
 
-import com.github.codepain.mediadownload.download.BundleDownload;
-import com.github.codepain.mediadownload.download.Download;
 import com.github.codepain.mediadownload.download.Downloadable;
 import com.github.codepain.mediadownload.download.DownloadedItem;
-import com.github.codepain.mediadownload.listener.Event;
 import com.github.codepain.mediadownload.listener.EventType;
 import com.github.codepain.mediadownload.save.MimeMappings;
 import com.github.codepain.mediadownload.save.SaveOptions;
@@ -28,25 +22,19 @@ import com.github.codepain.mediadownload.save.SaveOptions;
  * bundles several {@linkplain Track tracks} and has some meta information like
  * an album art (the cover).
  * </p>
+ * <p>
+ * The bundled tracks are strongly coupled as they share some more meta information,
+ * opposed to q {@linkplain LooseTrackSet loosely coupled track set}.
+ * </p>
  * 
  * @author codepain
- *
+ * @see LooseTrackSet
  */
-public class Album extends Downloadable {
-
-	private final URL url;
-
-	private final List<Track> tracks = new ArrayList<>();
-
-	private String artist;
+public class Album extends LooseTrackSet {
 
 	private String title;
 
-	private DownloadedItem albumArt;
-
-	private boolean downloadFinished;
-
-	private BundleDownload download;
+	DownloadedItem albumArt;
 
 	/**
 	 * <p>
@@ -57,27 +45,7 @@ public class Album extends Downloadable {
 	 *            The {@link URL} of the album
 	 */
 	public Album(final URL url) {
-		this.url = url;
-	}
-
-	@Override
-	public Download download() {
-		download = (BundleDownload) new BundleDownload(this).listener(this);
-
-		synchronized (tracks) {
-			for (final Track track : tracks) {
-				download.add(track.listener(download).download());
-			}
-		}
-
-		return download;
-	}
-
-	@Override
-	protected void onEvent(final Event event) {
-		if (EventType.DOWNLOAD_FINISHED.equals(event.type()) && event.source() == download) {
-			downloadFinished = true;
-		}
+		super(url);
 	}
 
 	@Override
@@ -139,53 +107,10 @@ public class Album extends Downloadable {
 		}
 	}
 
-	/**
-	 * <p>
-	 * Adds the {@linkplain Track track} to this album.
-	 * </p>
-	 * <p>
-	 * After adding it the album is {@linkplain Track#album(Album) set} in the
-	 * track and registers as
-	 * {@linkplain Track#listener(com.github.codepain.mediadownload.listener.Listener)
-	 * listener}.
-	 * </p>
-	 * 
-	 * @param track
-	 *            The track to add
-	 * @throws NullPointerException
-	 *             If the track is {@code null}
-	 */
+	@Override
 	public void add(final Track track) {
-		synchronized (tracks) {
-			tracks.add(Objects.requireNonNull(track));
-			track.album(this);
-			track.listener(this);
-		}
-	}
-
-	/**
-	 * <p>
-	 * Returns a copy of the list of {@linkplain Track tracks} of this album in
-	 * no specific order.
-	 * </p>
-	 * 
-	 * @return A copy of the list of {@linkplain Track tracks} of this album
-	 */
-	public List<Track> tracks() {
-		synchronized (tracks) {
-			return new ArrayList<>(tracks);
-		}
-	}
-
-	/**
-	 * <p>
-	 * Returns the {@link URL} of this album.
-	 * </p>
-	 * 
-	 * @return
-	 */
-	public URL url() {
-		return url;
+		super.add(track);
+		track.album(this);
 	}
 
 	/**
@@ -210,31 +135,6 @@ public class Album extends Downloadable {
 	 */
 	public Album title(final String title) {
 		this.title = title;
-		return this;
-	}
-
-	/**
-	 * <p>
-	 * Returns the album's artist.
-	 * </p>
-	 * 
-	 * @return
-	 */
-	public String artist() {
-		return artist;
-	}
-
-	/**
-	 * <p>
-	 * Sets the artist of this album.
-	 * </p>
-	 * 
-	 * @param artist
-	 *            The artist to set
-	 * @return The album with the new artist, allowing for chaining
-	 */
-	public Album artist(final String artist) {
-		this.artist = artist;
 		return this;
 	}
 

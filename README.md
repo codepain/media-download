@@ -2,7 +2,10 @@
 
 [![](https://jitpack.io/v/codepain/media-download.svg)](https://jitpack.io/#codepain/media-download)
 
-A Java library for downloading media files like MP3 from various sites (currently only including https://soundcloud.com/ and http://bandcamp.com/, but others will follow).
+A Java library for downloading media files like MP3 from various sites:
+* [Soundcloud](https://soundcloud.com)
+* [Bandcamp](http://bandcamp.com)
+* [HearThisAt](http://hearthis.at)
 
 ### Include in your build
 
@@ -17,7 +20,7 @@ repositories {
 * Add the dependency:
 ```
 dependencies {
-  compile 'com.github.codepain:media-download:0.1.0'
+  compile 'com.github.codepain:media-download:0.2.0'
 }
 ```
 

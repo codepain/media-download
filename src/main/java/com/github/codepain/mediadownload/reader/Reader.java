@@ -6,6 +6,7 @@ import java.net.URL;
 import java.util.Objects;
 import java.util.Random;
 
+import org.jsoup.Connection;
 import org.jsoup.Connection.Response;
 
 import com.github.codepain.mediadownload.MediaDownload;
@@ -31,25 +32,24 @@ import org.jsoup.Jsoup;
  * 
  **/
 public abstract class Reader implements EventSource, Listener {
-	
+
 	private static final String[] USER_AGENTS = {
-		"Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; AS; rv:11.0) like Gecko",
-		"Mozilla/5.0 (compatible, MSIE 11, Windows NT 6.3; Trident/7.0;  rv:11.0) like Gecko",
-		"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.246",
-		"Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 7.0; InfoPath.3; .NET CLR 3.1.40767; Trident/6.0; en-IN)",
-		"Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36",
-		"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2227.0 Safari/537.36",
-		"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.82 Safari/537.36",
-		"Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1",
-		"Mozilla/5.0 (Windows NT 6.3; rv:36.0) Gecko/20100101 Firefox/36.0"
-	};
+			"Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; AS; rv:11.0) like Gecko",
+			"Mozilla/5.0 (compatible, MSIE 11, Windows NT 6.3; Trident/7.0;  rv:11.0) like Gecko",
+			"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.246",
+			"Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 7.0; InfoPath.3; .NET CLR 3.1.40767; Trident/6.0; en-IN)",
+			"Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36",
+			"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2227.0 Safari/537.36",
+			"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.82 Safari/537.36",
+			"Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1",
+			"Mozilla/5.0 (Windows NT 6.3; rv:36.0) Gecko/20100101 Firefox/36.0" };
 
 	protected final URL url;
 
 	protected ReaderOptions options = new ReaderOptions();
 
 	private Listener listener;
-	
+
 	private final Random random = new Random();
 
 	/**
@@ -178,10 +178,9 @@ public abstract class Reader implements EventSource, Listener {
 		final String userAgent = USER_AGENTS[random.nextInt(USER_AGENTS.length)];
 		try (final ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
 			try {
-				final Response response = Jsoup.connect(url.toString()).ignoreContentType(true)
-						.header("Host", url.getHost()).header("Connection", "keep-alive").header("Pragma", "no-cache")
-						.header("Cache-Control", "no-cache").header("Accept-Encoding", "identity;q=1, *;q=0")
-						.header("User-Agent", userAgent).header("Accept", "*/*").execute();
+				final Response response = injectCommon(
+						Jsoup.connect(url.toString()).ignoreContentType(true).header("Host", url.getHost()), userAgent)
+								.execute();
 
 				if (mimeType == null) {
 					mimeType = response.header("Content-Type");
@@ -199,6 +198,18 @@ public abstract class Reader implements EventSource, Listener {
 		} catch (final IOException e) {
 			throw new IOException("Error reading " + url, e);
 		}
+	}
+
+	protected Connection injectCommon(final Connection connection) {
+		return connection.header("Connection", "keep-alive").header("Pragma", "no-cache")
+				.header("Cache-Control", "no-cache").header("Accept-Encoding", "identity;q=1, *;q=0")
+				.header("User-Agent", USER_AGENTS[random.nextInt(USER_AGENTS.length)]).header("Accept", "*/*");
+	}
+
+	protected Connection injectCommon(final Connection connection, final String userAgent) {
+		return connection.header("Connection", "keep-alive").header("Pragma", "no-cache")
+				.header("Cache-Control", "no-cache").header("Accept-Encoding", "identity;q=1, *;q=0")
+				.header("User-Agent", userAgent).header("Accept", "*/*");
 	}
 
 	@Override

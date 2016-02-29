@@ -35,20 +35,11 @@ Path rootPath = Paths.get("/path/to/save/location");
 MediaDownload.read(url).save(rootPath);
 ```
 
-If you want a more verbose output, you can always use a ```Listener```:
+If you want a more verbose output, you can hook into the [listener chain](https://github.com/codepain/media-download/wiki/Listener):
 ```java
 MediaDownload.read(url).listener(
   event -> 
     System.out.println(event.type() + ": " + event.source() + " / " + event.eventObject())
   )
 ).save(rootPath);
-```
-
-If you want to output some events when processing/interpreting the web page, you can set the ```Listener``` a little earlier:
-```java
-MediaDownload.connect(url).listener(
-  event -> 
-    System.out.println(event.type() + ": " + event.source() + " / " + event.eventObject())
-  )
-).read().save(rootPath);
 ```

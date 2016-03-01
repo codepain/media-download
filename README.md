@@ -43,3 +43,5 @@ MediaDownload.read(url).listener(
   )
 ).save(rootPath);
 ```
+
+You can influence the process by setting some [options](https://github.com/codepain/media-download/wiki/Options).
